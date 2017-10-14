@@ -1,6 +1,6 @@
 ﻿using System;
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 public class ExecutionOrderAttribute : System.Attribute
 {
 	public int order { get; private set; }
@@ -11,28 +11,28 @@ public class ExecutionOrderAttribute : System.Attribute
 	}
 }
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 public class ExecuteAfterAttribute : System.Attribute
 {
-	public Type type { get; private set; }
-	public int orderIncrease { get; private set; }
+	public Type targetType { get; private set; }
+	public int orderDiff { get; private set; }
 
-	public ExecuteAfterAttribute(Type type, int orderIncrease = 10)
+	public ExecuteAfterAttribute(Type targetType, int orderDiff = 10)
 	{
-		this.type = type;
-		this.orderIncrease = orderIncrease;
+		this.targetType = targetType;
+		this.orderDiff = orderDiff;
 	}
 }
 
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 public class ExecuteBeforeAttribute : System.Attribute
 {
-	public Type type { get; private set; }
-	public int orderDecrease { get; private set; }
+	public Type targetType { get; private set; }
+	public int orderDiff { get; private set; }
 
-	public ExecuteBeforeAttribute(Type type, int orderDecrease = 10)
+	public ExecuteBeforeAttribute(Type targetType, int orderDiff = 10)
 	{
-		this.type = type;
-		this.orderDecrease = orderDecrease;
+		this.targetType = targetType;
+		this.orderDiff = orderDiff;
 	}
 }
