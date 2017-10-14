@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecutionOrder(1)]
-[ExecuteAfter(typeof(AttributeTest2))]
+[ExecutionOrder(2)]
 [ExecuteAfter(typeof(AttributeTest3))]
-public class AttributeTest1 : MonoBehaviour {
+[ExecuteBefore(typeof(AttributeTest2))]
+public class AttributeTest4 : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
