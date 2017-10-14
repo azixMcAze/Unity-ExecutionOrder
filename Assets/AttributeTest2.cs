@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecutionOrder(2)]
-public class AttributeTest : MonoBehaviour {
+public class AttributeTest2 : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
