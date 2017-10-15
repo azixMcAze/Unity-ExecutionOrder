@@ -15,24 +15,24 @@ public class ExecutionOrderAttribute : System.Attribute
 public class ExecuteAfterAttribute : System.Attribute
 {
 	public Type targetType { get; private set; }
-	public int orderDiff { get; private set; }
+	// public int orderDiff { get; private set; }
 
-	public ExecuteAfterAttribute(Type targetType, int orderDiff = 10)
+	public ExecuteAfterAttribute(Type targetType/*, int orderDiff = 10*/)
 	{
 		this.targetType = targetType;
-		this.orderDiff = orderDiff;
+		// this.orderDiff = orderDiff;
 	}
 }
 
-[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
-public class ExecuteBeforeAttribute : System.Attribute
-{
-	public Type targetType { get; private set; }
-	public int orderDiff { get; private set; }
+// [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+// public class ExecuteBeforeAttribute : System.Attribute
+// {
+// 	public Type targetType { get; private set; }
+// 	public int orderDiff { get; private set; }
 
-	public ExecuteBeforeAttribute(Type targetType, int orderDiff = 10)
-	{
-		this.targetType = targetType;
-		this.orderDiff = orderDiff;
-	}
-}
+// 	public ExecuteBeforeAttribute(Type targetType, int orderDiff = 10)
+// 	{
+// 		this.targetType = targetType;
+// 		this.orderDiff = orderDiff;
+// 	}
+// }

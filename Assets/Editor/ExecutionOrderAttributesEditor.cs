@@ -19,7 +19,7 @@ public static class ExecutionOrderAttributeEditor
 	{
 		public MonoScript firstScript { get; set; }
 		public MonoScript secondScript { get; set; }
-		public int orderDiff { get; set; }
+		// public int orderDiff { get; set; }
 	}
 
 	static void FillTypeScriptDictionary()
@@ -60,20 +60,20 @@ public static class ExecutionOrderAttributeEditor
 				foreach(var attribute in attributes)
 				{
 					MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript, orderDiff = attribute.orderDiff };
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript/*, orderDiff = attribute.orderDiff*/ };
 					list.Add(dependency);
 				}
 			}
-			if(Attribute.IsDefined(type, typeof(ExecuteBeforeAttribute)))
-			{
-				var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
-				foreach(var attribute in attributes)
-				{
-					MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
-					list.Add(dependency);
-				}
-			}
+			// if(Attribute.IsDefined(type, typeof(ExecuteBeforeAttribute)))
+			// {
+			// 	var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
+			// 	foreach(var attribute in attributes)
+			// 	{
+			// 		MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
+			// 		ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
+			// 		list.Add(dependency);
+			// 	}
+			// }
 		}
 
 		return list;
@@ -112,11 +112,11 @@ public static class ExecutionOrderAttributeEditor
 
 		var dependencies = GetExecutionOrderDependencies();
 		foreach(var dependency in dependencies)
-			Debug.LogFormat("{0} after {1} {2}", dependency.firstScript.name, dependency.secondScript.name, dependency.orderDiff);
+			Debug.LogFormat("{0} after {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
-		// AssetDatabase.StartAssetEditing();
-		// UpdateExecutionOrder();
-		// AssetDatabase.StopAssetEditing();
+		AssetDatabase.StartAssetEditing();
+		UpdateExecutionOrder();
+		AssetDatabase.StopAssetEditing();
 
 		stopwatch.Stop();
 		Debug.LogFormat("{0} ms", stopwatch.Elapsed.TotalSeconds * 1000);
