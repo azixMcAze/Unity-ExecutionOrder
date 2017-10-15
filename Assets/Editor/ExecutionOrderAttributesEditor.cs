@@ -9,6 +9,65 @@ public static class ExecutionOrderAttributeEditor
 {
 	static Dictionary<Type, MonoScript> s_typeScriptDictionary = new Dictionary<Type, MonoScript>();
 
+	static Dictionary<MonoScript, List<MonoScript>> BuildGraph(List<ScriptExecutionOrderDependency> dependencies)
+	{
+		Dictionary<MonoScript, List<MonoScript>> graph = new Dictionary<MonoScript, List<MonoScript>>();
+		foreach(var dependency in dependencies)
+		{
+			var firstScript = dependency.firstScript;
+			var secondScript = dependency.secondScript;
+			List<MonoScript> edges;
+			if(!graph.TryGetValue(firstScript, out edges))
+			{
+				edges = new List<MonoScript>();
+				graph[firstScript] = edges;
+			}
+			edges.Add(secondScript);
+			if(!graph.ContainsKey(secondScript))
+			{
+				graph[secondScript] = new List<MonoScript>();
+			}
+		}
+
+		return graph;
+	}
+
+	static bool IsGraphCyclicRecursion(Dictionary<MonoScript, List<MonoScript>> graph, MonoScript node, Dictionary<MonoScript, bool> visited, Dictionary<MonoScript, bool> inPath)
+	{
+		if(!visited[node])
+		{
+			visited[node] = true;
+			inPath[node] = true;
+
+			foreach(var nextNode in graph[node])
+			{
+				if(!visited[nextNode])
+					return IsGraphCyclicRecursion(graph, nextNode, visited, inPath);
+				else if(inPath[nextNode])
+					return true;
+			}
+		}
+		inPath[node] = false;
+		return false;
+	}
+
+	static bool IsGraphCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
+	{
+		Dictionary<MonoScript, bool> visited = new Dictionary<MonoScript, bool>();
+		Dictionary<MonoScript, bool> inPath = new Dictionary<MonoScript, bool>();
+		foreach(var node in graph.Keys)
+		{
+			visited[node] = false;
+			inPath[node] = false;
+		}
+
+		foreach(var node in graph.Keys)
+			if(IsGraphCyclicRecursion(graph, node, visited, inPath))
+				return true;
+		
+		return false;
+	}
+
 	struct ScriptExecutionOrderDefinition
 	{
 		public MonoScript script { get; set; }
@@ -102,24 +161,38 @@ public static class ExecutionOrderAttributeEditor
 	static void OnDidReloadScripts()
 	{
 		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		Debug.Log(">>>>> start");
+		try
+		{
 		stopwatch.Start();
 
 		FillTypeScriptDictionary();
 
-		var definitions = GetExecutionOrderDefinitions();
-		foreach(var definition in definitions)
-			Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
+		// var definitions = GetExecutionOrderDefinitions();
+		// foreach(var definition in definitions)
+		// 	Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
 
 		var dependencies = GetExecutionOrderDependencies();
 		foreach(var dependency in dependencies)
-			Debug.LogFormat("{0} after {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
+			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
-		AssetDatabase.StartAssetEditing();
-		UpdateExecutionOrder();
-		AssetDatabase.StopAssetEditing();
+		Dictionary<MonoScript, List<MonoScript>> graph = BuildGraph(dependencies);
+		if(IsGraphCyclic(graph))
+		{
+			Debug.LogError("Circular script execution order definitions");
+			return;
+		}
 
-		stopwatch.Stop();
-		Debug.LogFormat("{0} ms", stopwatch.Elapsed.TotalSeconds * 1000);
+		// AssetDatabase.StartAssetEditing();
+		// UpdateExecutionOrder();
+		// AssetDatabase.StopAssetEditing();
+
+		}
+		finally
+		{
+			stopwatch.Stop();
+			Debug.LogFormat(">>>>> end {0} ms", stopwatch.Elapsed.TotalSeconds * 1000);
+		}
 	}
 
 
