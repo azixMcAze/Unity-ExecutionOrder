@@ -19,12 +19,12 @@ public static class ExecutionOrderAttributeEditor
 				if(!graph.TryGetValue(source, out edges))
 				{
 					edges = new List<MonoScript>();
-					graph[source] = edges;
+					graph.Add(source, edges);
 				}
 				edges.Add(dest);
 				if(!graph.ContainsKey(dest))
 				{
-					graph[dest] = new List<MonoScript>();
+					graph.Add(dest, new List<MonoScript>());
 				}
 			}
 
@@ -33,7 +33,7 @@ public static class ExecutionOrderAttributeEditor
 				var node = definition.script;
 				if(!graph.ContainsKey(node))
 				{
-					graph[node] = new List<MonoScript>();
+					graph.Add(node, new List<MonoScript>());
 				}
 			}
 
@@ -75,8 +75,8 @@ public static class ExecutionOrderAttributeEditor
 			var inPath = new Dictionary<MonoScript, bool>();
 			foreach(var node in graph.Keys)
 			{
-				visited[node] = false;
-				inPath[node] = false;
+				visited.Add(node, false);
+				inPath.Add(node, false);
 			}
 
 			foreach(var node in graph.Keys)
