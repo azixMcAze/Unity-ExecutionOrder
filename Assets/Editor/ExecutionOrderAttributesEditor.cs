@@ -78,6 +78,35 @@ public static class ExecutionOrderAttributeEditor
 		return false;
 	}
 
+	static List<MonoScript> GetGraphRoots(Dictionary<MonoScript, List<MonoScript>> graph)
+	{
+		Dictionary<MonoScript, int> degrees = new Dictionary<MonoScript, int>();
+		foreach(var node in graph.Keys)
+		{
+			degrees.Add(node, 0);
+		}
+
+		foreach(var kvp in graph)
+		{
+			var node = kvp.Key;
+			var edges = kvp.Value;
+			foreach(var succ in edges)
+			{
+				degrees[succ]++;
+			}
+		}
+
+		List<MonoScript> roots = new List<MonoScript>();
+		foreach(var kvp in degrees)
+		{
+			var node = kvp.Key;
+			int degree = kvp.Value;
+			if(degree == 0)
+				roots.Add(node);
+		}
+		return roots;
+	}
+
 	struct ScriptExecutionOrderDefinition
 	{
 		public MonoScript script { get; set; }
@@ -186,11 +215,17 @@ public static class ExecutionOrderAttributeEditor
 		foreach(var dependency in dependencies)
 			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
-		Dictionary<MonoScript, List<MonoScript>> graph = BuildGraph(dependencies);
+		var graph = BuildGraph(dependencies);
 		if(IsGraphCyclic(graph))
 		{
 			Debug.LogError("Circular script execution order definitions");
 			return;
+		}
+
+		var roots = GetGraphRoots(graph);
+		foreach(var root in roots)
+		{
+			Debug.Log("root " + root.name);
 		}
 
 		// AssetDatabase.StartAssetEditing();
