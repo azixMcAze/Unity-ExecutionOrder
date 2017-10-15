@@ -244,7 +244,7 @@ public static class ExecutionOrderAttributeEditor
 		return list;
 	}
 
-	static Dictionary<MonoScript, int> GetInitalOrders(List<ScriptExecutionOrderDefinition> definitions, List<MonoScript> graphRoots)
+	static Dictionary<MonoScript, int> GetInitalExecutionOrder(List<ScriptExecutionOrderDefinition> definitions, List<MonoScript> graphRoots)
 	{
 		var orders = new Dictionary<MonoScript, int>();
 		foreach(var definition in definitions)
@@ -264,6 +264,18 @@ public static class ExecutionOrderAttributeEditor
 		}
 
 		return orders;
+	}
+
+	static void UpdateExecutionOrder(Dictionary<MonoScript, int> orders)
+	{
+		foreach(var kvp in orders)
+		{
+			var script = kvp.Key;
+			var order = kvp.Value;
+
+			if(MonoImporter.GetExecutionOrder(script) != order)
+				MonoImporter.SetExecutionOrder(script, order);
+		}
 	}
 
 	[UnityEditor.Callbacks.DidReloadScripts]
@@ -293,7 +305,7 @@ public static class ExecutionOrderAttributeEditor
 		}
 
 		var roots = Graph.GetRoots(graph);
-		var orders = GetInitalOrders(definitions, roots);
+		var orders = GetInitalExecutionOrder(definitions, roots);
 		Graph.PropagateValues(graph, orders, 10);
 
 		foreach(var kvp in orders)
@@ -303,33 +315,15 @@ public static class ExecutionOrderAttributeEditor
 			Debug.LogFormat("Order {0} {1}", script.name, order);
 		}
 
-		// AssetDatabase.StartAssetEditing();
-		// UpdateExecutionOrder();
-		// AssetDatabase.StopAssetEditing();
+		AssetDatabase.StartAssetEditing();
+		UpdateExecutionOrder(orders);
+		AssetDatabase.StopAssetEditing();
 
 		}
 		finally
 		{
 			stopwatch.Stop();
 			Debug.LogFormat(">>>>> end {0} ms", stopwatch.Elapsed.TotalSeconds * 1000);
-		}
-	}
-
-
-
-	static void UpdateExecutionOrder()
-	{
-		var scripts = MonoImporter.GetAllRuntimeMonoScripts();
-		foreach(var script in scripts)
-		{
-			var type = script.GetClass();
-			if(type != null && Attribute.IsDefined(type, typeof(ExecutionOrderAttribute)))
-			{
-				var attribute = (ExecutionOrderAttribute)Attribute.GetCustomAttribute(type, typeof(ExecutionOrderAttribute));
-				int order = attribute.order;
-				if(MonoImporter.GetExecutionOrder(script) != order)
-					MonoImporter.SetExecutionOrder(script, order);
-			}
 		}
 	}
 }
