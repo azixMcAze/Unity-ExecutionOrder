@@ -6,14 +6,7 @@ using UnityEngine;
 [ExecuteAfter(typeof(AttributeTest2))]
 [ExecuteAfter(typeof(AttributeTest3))]
 public class AttributeTest1 : MonoBehaviour {
-
-	// Use this for initialization
 	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+		Debug.Log(this.GetType().Name);
 	}
 }
