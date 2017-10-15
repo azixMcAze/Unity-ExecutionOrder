@@ -7,8 +7,6 @@ using System.Reflection;
 
 public static class ExecutionOrderAttributeEditor
 {
-	static Dictionary<Type, MonoScript> s_typeScriptDictionary = new Dictionary<Type, MonoScript>();
-
 	static class Graph
 	{
 		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDependency> dependencies)
@@ -147,9 +145,9 @@ public static class ExecutionOrderAttributeEditor
 		// public int orderDiff { get; set; }
 	}
 
-	static void FillTypeScriptDictionary()
+	static Dictionary<Type, MonoScript> GetTypeDictionary()
 	{
-		s_typeScriptDictionary.Clear();
+		Dictionary<Type, MonoScript> types = new Dictionary<Type, MonoScript>();
 
 		var scripts = MonoImporter.GetAllRuntimeMonoScripts();
 		foreach(var script in scripts)
@@ -157,10 +155,12 @@ public static class ExecutionOrderAttributeEditor
 			var type = script.GetClass();
 			if(IsTypeValid(type))
 			{
-				if(!s_typeScriptDictionary.ContainsKey(type))
-					s_typeScriptDictionary.Add(type, script);
+				if(!types.ContainsKey(type))
+					types.Add(type, script);
 			}
 		}
+
+		return types;
 	}
 
 	static bool IsTypeValid(Type type)
@@ -171,11 +171,11 @@ public static class ExecutionOrderAttributeEditor
 			return false;
 	}
 
-	static List<ScriptExecutionOrderDependency> GetExecutionOrderDependencies()
+	static List<ScriptExecutionOrderDependency> GetExecutionOrderDependencies(Dictionary<Type, MonoScript> types)
 	{
 		List<ScriptExecutionOrderDependency> list = new List<ScriptExecutionOrderDependency>();
 
-		foreach(var kvp in s_typeScriptDictionary)
+		foreach(var kvp in types)
 		{
 			var type = kvp.Key;
 			var script = kvp.Value;
@@ -184,7 +184,7 @@ public static class ExecutionOrderAttributeEditor
 				var attributes = (ExecuteAfterAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteAfterAttribute));
 				foreach(var attribute in attributes)
 				{
-					MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
+					MonoScript targetScript = types[attribute.targetType];
 					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script/*, orderDiff = attribute.orderDiff*/ };
 					list.Add(dependency);
 				}
@@ -194,7 +194,7 @@ public static class ExecutionOrderAttributeEditor
 			// 	var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
 			// 	foreach(var attribute in attributes)
 			// 	{
-			// 		MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
+			// 		MonoScript targetScript = types[attribute.targetType];
 			// 		ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript, orderDiff = attribute.orderDiff };
 			// 		list.Add(dependency);
 			// 	}
@@ -204,11 +204,11 @@ public static class ExecutionOrderAttributeEditor
 		return list;
 	}
 
-	static List<ScriptExecutionOrderDefinition> GetExecutionOrderDefinitions()
+	static List<ScriptExecutionOrderDefinition> GetExecutionOrderDefinitions(Dictionary<Type, MonoScript> types)
 	{
 		List<ScriptExecutionOrderDefinition> list = new List<ScriptExecutionOrderDefinition>();
 
-		foreach(var kvp in s_typeScriptDictionary)
+		foreach(var kvp in types)
 		{
 			var type = kvp.Key;
 			var script = kvp.Value;
@@ -232,13 +232,13 @@ public static class ExecutionOrderAttributeEditor
 		{
 		stopwatch.Start();
 
-		FillTypeScriptDictionary();
+		var types = GetTypeDictionary();
 
-		// var definitions = GetExecutionOrderDefinitions();
+		// var definitions = GetExecutionOrderDefinitions(types);
 		// foreach(var definition in definitions)
 		// 	Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
 
-		var dependencies = GetExecutionOrderDependencies();
+		var dependencies = GetExecutionOrderDependencies(types);
 		foreach(var dependency in dependencies)
 			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
