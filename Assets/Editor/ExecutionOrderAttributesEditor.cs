@@ -7,9 +7,10 @@ public static class ExecutionOrderAttributeEditor
 {
 	static class Graph
 	{
-		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDependency> dependencies)
+		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDefinition> definitions, List<ScriptExecutionOrderDependency> dependencies)
 		{
 			var graph = new Dictionary<MonoScript, List<MonoScript>>();
+
 			foreach(var dependency in dependencies)
 			{
 				var source = dependency.firstScript;
@@ -24,6 +25,15 @@ public static class ExecutionOrderAttributeEditor
 				if(!graph.ContainsKey(dest))
 				{
 					graph[dest] = new List<MonoScript>();
+				}
+			}
+
+			foreach(var definition in definitions)
+			{
+				var node = definition.script;
+				if(!graph.ContainsKey(node))
+				{
+					graph[node] = new List<MonoScript>();
 				}
 			}
 
@@ -245,15 +255,15 @@ public static class ExecutionOrderAttributeEditor
 
 		var types = GetTypeDictionary();
 
-		// var definitions = GetExecutionOrderDefinitions(types);
-		// foreach(var definition in definitions)
-		// 	Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
+		var definitions = GetExecutionOrderDefinitions(types);
+		foreach(var definition in definitions)
+			Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
 
 		var dependencies = GetExecutionOrderDependencies(types);
 		foreach(var dependency in dependencies)
 			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
-		var graph = Graph.Create(dependencies);
+		var graph = Graph.Create(definitions, dependencies);
 		if(Graph.IsCyclic(graph))
 		{
 			Debug.LogError("Circular script execution order definitions");
@@ -267,10 +277,20 @@ public static class ExecutionOrderAttributeEditor
 		}
 
 		var orders = new Dictionary<MonoScript, int>();
+		foreach(var definition in definitions)
+		{
+			var script = definition.script;
+			var order = definition.order;
+			orders.Add(script, order);
+		}
+
 		foreach(var script in roots)
 		{
-			int order = MonoImporter.GetExecutionOrder(script);
-			orders.Add(script, order);
+			if(!orders.ContainsKey(script))
+			{
+				int order = MonoImporter.GetExecutionOrder(script);
+				orders.Add(script, order);
+			}
 		}
 
 		Graph.PropagateValues(graph, orders, 10);
