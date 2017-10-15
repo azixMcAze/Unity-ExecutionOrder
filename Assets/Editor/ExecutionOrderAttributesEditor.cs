@@ -177,8 +177,15 @@ public static class ExecutionOrderAttributeEditor
 		{
 			var type = kvp.Key;
 			var script = kvp.Value;
+			bool hasExecutionOrderAttribute = Attribute.IsDefined(type, typeof(ExecutionOrderAttribute));
 			if(Attribute.IsDefined(type, typeof(ExecuteAfterAttribute)))
 			{
+				if(hasExecutionOrderAttribute)
+				{
+					Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteAfter] attributes", script.name);
+					continue;
+				}
+
 				var attributes = (ExecuteAfterAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteAfterAttribute));
 				foreach(var attribute in attributes)
 				{
@@ -189,6 +196,12 @@ public static class ExecutionOrderAttributeEditor
 			}
 			// if(Attribute.IsDefined(type, typeof(ExecuteBeforeAttribute)))
 			// {
+			// 	if(hasExecutionOrderAttribute)
+			// 	{
+			// 		Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteBefore] attributes", script.name);
+			// 		continue;
+			// 	}
+
 			// 	var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
 			// 	foreach(var attribute in attributes)
 			// 	{
