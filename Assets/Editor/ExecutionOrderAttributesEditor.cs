@@ -9,102 +9,106 @@ public static class ExecutionOrderAttributeEditor
 {
 	static Dictionary<Type, MonoScript> s_typeScriptDictionary = new Dictionary<Type, MonoScript>();
 
-	static Dictionary<MonoScript, List<MonoScript>> BuildGraph(List<ScriptExecutionOrderDependency> dependencies)
+	static class Graph
 	{
-		Dictionary<MonoScript, List<MonoScript>> graph = new Dictionary<MonoScript, List<MonoScript>>();
-		foreach(var dependency in dependencies)
+		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDependency> dependencies)
 		{
-			var firstScript = dependency.firstScript;
-			var secondScript = dependency.secondScript;
-			List<MonoScript> edges;
-			if(!graph.TryGetValue(firstScript, out edges))
+			Dictionary<MonoScript, List<MonoScript>> graph = new Dictionary<MonoScript, List<MonoScript>>();
+			foreach(var dependency in dependencies)
 			{
-				edges = new List<MonoScript>();
-				graph[firstScript] = edges;
-			}
-			edges.Add(secondScript);
-			if(!graph.ContainsKey(secondScript))
-			{
-				graph[secondScript] = new List<MonoScript>();
-			}
-		}
-
-		return graph;
-	}
-
-	static bool IsGraphCyclicRecursion(Dictionary<MonoScript, List<MonoScript>> graph, MonoScript node, Dictionary<MonoScript, bool> visited, Dictionary<MonoScript, bool> inPath)
-	{
-		if(!visited[node])
-		{
-			visited[node] = true;
-			inPath[node] = true;
-
-			foreach(var succ in graph[node])
-			{
-				if(IsGraphCyclicRecursion(graph, succ, visited, inPath))
+				var firstScript = dependency.firstScript;
+				var secondScript = dependency.secondScript;
+				List<MonoScript> edges;
+				if(!graph.TryGetValue(firstScript, out edges))
 				{
-					inPath[node] = false;
-					return true;
+					edges = new List<MonoScript>();
+					graph[firstScript] = edges;
+				}
+				edges.Add(secondScript);
+				if(!graph.ContainsKey(secondScript))
+				{
+					graph[secondScript] = new List<MonoScript>();
 				}
 			}
 
-			inPath[node] = false;
-			return false;
-		}
-		else if(inPath[node])
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	static bool IsGraphCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
-	{
-		Dictionary<MonoScript, bool> visited = new Dictionary<MonoScript, bool>();
-		Dictionary<MonoScript, bool> inPath = new Dictionary<MonoScript, bool>();
-		foreach(var node in graph.Keys)
-		{
-			visited[node] = false;
-			inPath[node] = false;
+			return graph;
 		}
 
-		foreach(var node in graph.Keys)
-			if(IsGraphCyclicRecursion(graph, node, visited, inPath))
-				return true;
-		
-		return false;
-	}
-
-	static List<MonoScript> GetGraphRoots(Dictionary<MonoScript, List<MonoScript>> graph)
-	{
-		Dictionary<MonoScript, int> degrees = new Dictionary<MonoScript, int>();
-		foreach(var node in graph.Keys)
+		static bool IsCyclicRecursion(Dictionary<MonoScript, List<MonoScript>> graph, MonoScript node, Dictionary<MonoScript, bool> visited, Dictionary<MonoScript, bool> inPath)
 		{
-			degrees.Add(node, 0);
-		}
-
-		foreach(var kvp in graph)
-		{
-			var node = kvp.Key;
-			var edges = kvp.Value;
-			foreach(var succ in edges)
+			if(!visited[node])
 			{
-				degrees[succ]++;
+				visited[node] = true;
+				inPath[node] = true;
+
+				foreach(var succ in graph[node])
+				{
+					if(IsCyclicRecursion(graph, succ, visited, inPath))
+					{
+						inPath[node] = false;
+						return true;
+					}
+				}
+
+				inPath[node] = false;
+				return false;
+			}
+			else if(inPath[node])
+			{
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
 
-		List<MonoScript> roots = new List<MonoScript>();
-		foreach(var kvp in degrees)
+		public static bool IsCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
 		{
-			var node = kvp.Key;
-			int degree = kvp.Value;
-			if(degree == 0)
-				roots.Add(node);
+			Dictionary<MonoScript, bool> visited = new Dictionary<MonoScript, bool>();
+			Dictionary<MonoScript, bool> inPath = new Dictionary<MonoScript, bool>();
+			foreach(var node in graph.Keys)
+			{
+				visited[node] = false;
+				inPath[node] = false;
+			}
+
+			foreach(var node in graph.Keys)
+				if(IsCyclicRecursion(graph, node, visited, inPath))
+					return true;
+			
+			return false;
 		}
-		return roots;
+
+		public static List<MonoScript> GetRoots(Dictionary<MonoScript, List<MonoScript>> graph)
+		{
+			Dictionary<MonoScript, int> degrees = new Dictionary<MonoScript, int>();
+			foreach(var node in graph.Keys)
+			{
+				degrees.Add(node, 0);
+			}
+
+			foreach(var kvp in graph)
+			{
+				var node = kvp.Key;
+				var edges = kvp.Value;
+				foreach(var succ in edges)
+				{
+					degrees[succ]++;
+				}
+			}
+
+			List<MonoScript> roots = new List<MonoScript>();
+			foreach(var kvp in degrees)
+			{
+				var node = kvp.Key;
+				int degree = kvp.Value;
+				if(degree == 0)
+					roots.Add(node);
+			}
+			return roots;
+		}
+
 	}
 
 	struct ScriptExecutionOrderDefinition
@@ -215,14 +219,14 @@ public static class ExecutionOrderAttributeEditor
 		foreach(var dependency in dependencies)
 			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
 
-		var graph = BuildGraph(dependencies);
-		if(IsGraphCyclic(graph))
+		var graph = Graph.Create(dependencies);
+		if(Graph.IsCyclic(graph))
 		{
 			Debug.LogError("Circular script execution order definitions");
 			return;
 		}
 
-		var roots = GetGraphRoots(graph);
+		var roots = Graph.GetRoots(graph);
 		foreach(var root in roots)
 		{
 			Debug.Log("root " + root.name);
