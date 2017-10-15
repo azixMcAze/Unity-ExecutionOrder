@@ -244,6 +244,28 @@ public static class ExecutionOrderAttributeEditor
 		return list;
 	}
 
+	static Dictionary<MonoScript, int> GetInitalOrders(List<ScriptExecutionOrderDefinition> definitions, List<MonoScript> graphRoots)
+	{
+		var orders = new Dictionary<MonoScript, int>();
+		foreach(var definition in definitions)
+		{
+			var script = definition.script;
+			var order = definition.order;
+			orders.Add(script, order);
+		}
+
+		foreach(var script in graphRoots)
+		{
+			if(!orders.ContainsKey(script))
+			{
+				int order = MonoImporter.GetExecutionOrder(script);
+				orders.Add(script, order);
+			}
+		}
+
+		return orders;
+	}
+
 	[UnityEditor.Callbacks.DidReloadScripts]
 	static void OnDidReloadScripts()
 	{
@@ -271,28 +293,7 @@ public static class ExecutionOrderAttributeEditor
 		}
 
 		var roots = Graph.GetRoots(graph);
-		foreach(var root in roots)
-		{
-			Debug.Log("root " + root.name);
-		}
-
-		var orders = new Dictionary<MonoScript, int>();
-		foreach(var definition in definitions)
-		{
-			var script = definition.script;
-			var order = definition.order;
-			orders.Add(script, order);
-		}
-
-		foreach(var script in roots)
-		{
-			if(!orders.ContainsKey(script))
-			{
-				int order = MonoImporter.GetExecutionOrder(script);
-				orders.Add(script, order);
-			}
-		}
-
+		var orders = GetInitalOrders(definitions, roots);
 		Graph.PropagateValues(graph, orders, 10);
 
 		foreach(var kvp in orders)
