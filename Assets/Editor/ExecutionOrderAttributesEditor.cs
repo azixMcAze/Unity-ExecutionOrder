@@ -109,6 +109,29 @@ public static class ExecutionOrderAttributeEditor
 			return roots;
 		}
 
+		public static void PropagateValues(Dictionary<MonoScript, List<MonoScript>> graph, Dictionary<MonoScript, int> values, int valueIncrement)
+		{
+			Queue<MonoScript> queue = new Queue<MonoScript>();
+
+			foreach(var node in values.Keys)
+				queue.Enqueue(node);
+
+			while(queue.Count > 0)
+			{
+				var node = queue.Dequeue();
+				int value = values[node] + valueIncrement;
+
+				foreach(var succ in graph[node])
+				{
+					int prevValue;
+					if(!values.TryGetValue(succ, out prevValue) || value > prevValue)
+					{
+						values[succ] = value;
+						queue.Enqueue(succ);
+					}
+				}
+			}
+		}
 	}
 
 	struct ScriptExecutionOrderDefinition
@@ -230,6 +253,22 @@ public static class ExecutionOrderAttributeEditor
 		foreach(var root in roots)
 		{
 			Debug.Log("root " + root.name);
+		}
+
+		var orders = new Dictionary<MonoScript, int>();
+		foreach(var script in roots)
+		{
+			int order = MonoImporter.GetExecutionOrder(script);
+			orders.Add(script, order);
+		}
+
+		Graph.PropagateValues(graph, orders, 10);
+
+		foreach(var kvp in orders)
+		{
+			var script = kvp.Key;
+			var order = kvp.Value;
+			Debug.LogFormat("Order {0} {1}", script.name, order);
 		}
 
 		// AssetDatabase.StartAssetEditing();
