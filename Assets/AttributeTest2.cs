@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecutionOrder(2)]
+// [ExecutionOrder(2)]
 [ExecuteAfter(typeof(AttributeTest1))]
 public class AttributeTest2 : MonoBehaviour {
 	void Start () {
