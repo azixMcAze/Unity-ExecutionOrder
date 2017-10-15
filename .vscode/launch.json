@@ -1,0 +1,38 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Unity Editor",
+            "type": "unity",
+            "request": "launch"
+        },
+        {
+            "name": "Windows Player",
+            "type": "unity",
+            "request": "launch"
+        },
+        {
+            "name": "OSX Player",
+            "type": "unity",
+            "request": "launch"
+        },
+        {
+            "name": "Linux Player",
+            "type": "unity",
+            "request": "launch"
+        },
+        {
+            "name": "iOS Player",
+            "type": "unity",
+            "request": "launch"
+        },
+        {
+            "name": "Android Player",
+            "type": "unity",
+            "request": "launch"
+        }
+    ]
+}
