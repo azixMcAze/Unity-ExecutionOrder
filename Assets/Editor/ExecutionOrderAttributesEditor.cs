@@ -16,18 +16,18 @@ public static class ExecutionOrderAttributeEditor
 			Dictionary<MonoScript, List<MonoScript>> graph = new Dictionary<MonoScript, List<MonoScript>>();
 			foreach(var dependency in dependencies)
 			{
-				var firstScript = dependency.firstScript;
-				var secondScript = dependency.secondScript;
+				var source = dependency.firstScript;
+				var dest = dependency.secondScript;
 				List<MonoScript> edges;
-				if(!graph.TryGetValue(firstScript, out edges))
+				if(!graph.TryGetValue(source, out edges))
 				{
 					edges = new List<MonoScript>();
-					graph[firstScript] = edges;
+					graph[source] = edges;
 				}
-				edges.Add(secondScript);
-				if(!graph.ContainsKey(secondScript))
+				edges.Add(dest);
+				if(!graph.ContainsKey(dest))
 				{
-					graph[secondScript] = new List<MonoScript>();
+					graph[dest] = new List<MonoScript>();
 				}
 			}
 
