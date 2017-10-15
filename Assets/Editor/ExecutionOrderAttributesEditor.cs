@@ -295,23 +295,11 @@ public static class ExecutionOrderAttributeEditor
 	[UnityEditor.Callbacks.DidReloadScripts]
 	static void OnDidReloadScripts()
 	{
-		var stopwatch = new System.Diagnostics.Stopwatch();
-		Debug.Log(">>>>> start");
-		try
-		{
-		stopwatch.Start();
-
 		var types = GetTypeDictionary();
-
 		var definitions = GetExecutionOrderDefinitions(types);
-		foreach(var definition in definitions)
-			Debug.LogFormat("{0} {1}", definition.script.name, definition.order);
-
 		var dependencies = GetExecutionOrderDependencies(types);
-		foreach(var dependency in dependencies)
-			Debug.LogFormat("{0} -> {1}", dependency.firstScript.name, dependency.secondScript.name/*, dependency.orderDiff*/);
-
 		var graph = Graph.Create(definitions, dependencies);
+
 		if(Graph.IsCyclic(graph))
 		{
 			Debug.LogError("Circular script execution order definitions");
@@ -322,20 +310,6 @@ public static class ExecutionOrderAttributeEditor
 		var orders = GetInitalExecutionOrder(definitions, roots);
 		Graph.PropagateValues(graph, orders, 10);
 
-		foreach(var kvp in orders)
-		{
-			var script = kvp.Key;
-			var order = kvp.Value;
-			Debug.LogFormat("Order {0} {1}", script.name, order);
-		}
-
 		UpdateExecutionOrder(orders);
-
-		}
-		finally
-		{
-			stopwatch.Stop();
-			Debug.LogFormat(">>>>> end {0} ms", stopwatch.Elapsed.TotalSeconds * 1000);
-		}
 	}
 }
