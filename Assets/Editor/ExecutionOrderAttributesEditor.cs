@@ -268,13 +268,27 @@ public static class ExecutionOrderAttributeEditor
 
 	static void UpdateExecutionOrder(Dictionary<MonoScript, int> orders)
 	{
+		bool startedEdit = false;
+
 		foreach(var kvp in orders)
 		{
 			var script = kvp.Key;
 			var order = kvp.Value;
 
 			if(MonoImporter.GetExecutionOrder(script) != order)
+			{
+				if(!startedEdit)
+				{
+					AssetDatabase.StartAssetEditing();
+					startedEdit = true;
+				}
 				MonoImporter.SetExecutionOrder(script, order);
+			}
+		}
+
+		if(startedEdit)
+		{
+			AssetDatabase.StopAssetEditing();
 		}
 	}
 
@@ -315,9 +329,7 @@ public static class ExecutionOrderAttributeEditor
 			Debug.LogFormat("Order {0} {1}", script.name, order);
 		}
 
-		AssetDatabase.StartAssetEditing();
 		UpdateExecutionOrder(orders);
-		AssetDatabase.StopAssetEditing();
 
 		}
 		finally
