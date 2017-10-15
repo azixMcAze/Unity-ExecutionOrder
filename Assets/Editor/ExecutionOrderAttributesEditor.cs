@@ -162,7 +162,7 @@ public static class ExecutionOrderAttributeEditor
 				foreach(var attribute in attributes)
 				{
 					MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript/*, orderDiff = attribute.orderDiff*/ };
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script/*, orderDiff = attribute.orderDiff*/ };
 					list.Add(dependency);
 				}
 			}
@@ -172,7 +172,7 @@ public static class ExecutionOrderAttributeEditor
 			// 	foreach(var attribute in attributes)
 			// 	{
 			// 		MonoScript targetScript = s_typeScriptDictionary[attribute.targetType];
-			// 		ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
+			// 		ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript, orderDiff = attribute.orderDiff };
 			// 		list.Add(dependency);
 			// 	}
 			// }
