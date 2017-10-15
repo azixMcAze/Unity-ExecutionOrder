@@ -39,16 +39,26 @@ public static class ExecutionOrderAttributeEditor
 			visited[node] = true;
 			inPath[node] = true;
 
-			foreach(var nextNode in graph[node])
+			foreach(var succ in graph[node])
 			{
-				if(!visited[nextNode])
-					return IsGraphCyclicRecursion(graph, nextNode, visited, inPath);
-				else if(inPath[nextNode])
+				if(IsGraphCyclicRecursion(graph, succ, visited, inPath))
+				{
+					inPath[node] = false;
 					return true;
+				}
 			}
+
+			inPath[node] = false;
+			return false;
 		}
-		inPath[node] = false;
-		return false;
+		else if(inPath[node])
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	static bool IsGraphCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
