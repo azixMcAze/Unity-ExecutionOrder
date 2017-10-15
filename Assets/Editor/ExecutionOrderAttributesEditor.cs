@@ -105,7 +105,7 @@ public static class ExecutionOrderAttributeEditor
 			return roots;
 		}
 
-		public static void PropagateValues(Dictionary<MonoScript, List<MonoScript>> graph, Dictionary<MonoScript, int> values, int valueIncrement)
+		public static void PropagateValues(Dictionary<MonoScript, List<MonoScript>> graph, Dictionary<MonoScript, int> values, int increment)
 		{
 			var queue = new Queue<MonoScript>();
 
@@ -115,7 +115,7 @@ public static class ExecutionOrderAttributeEditor
 			while(queue.Count > 0)
 			{
 				var node = queue.Dequeue();
-				int value = values[node] + valueIncrement;
+				int value = values[node] + increment;
 
 				foreach(var succ in graph[node])
 				{
