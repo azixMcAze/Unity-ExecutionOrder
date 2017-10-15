@@ -11,7 +11,7 @@ public static class ExecutionOrderAttributeEditor
 	{
 		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDependency> dependencies)
 		{
-			Dictionary<MonoScript, List<MonoScript>> graph = new Dictionary<MonoScript, List<MonoScript>>();
+			var graph = new Dictionary<MonoScript, List<MonoScript>>();
 			foreach(var dependency in dependencies)
 			{
 				var source = dependency.firstScript;
@@ -63,8 +63,8 @@ public static class ExecutionOrderAttributeEditor
 
 		public static bool IsCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
 		{
-			Dictionary<MonoScript, bool> visited = new Dictionary<MonoScript, bool>();
-			Dictionary<MonoScript, bool> inPath = new Dictionary<MonoScript, bool>();
+			var visited = new Dictionary<MonoScript, bool>();
+			var inPath = new Dictionary<MonoScript, bool>();
 			foreach(var node in graph.Keys)
 			{
 				visited[node] = false;
@@ -80,7 +80,7 @@ public static class ExecutionOrderAttributeEditor
 
 		public static List<MonoScript> GetRoots(Dictionary<MonoScript, List<MonoScript>> graph)
 		{
-			Dictionary<MonoScript, int> degrees = new Dictionary<MonoScript, int>();
+			var degrees = new Dictionary<MonoScript, int>();
 			foreach(var node in graph.Keys)
 			{
 				degrees.Add(node, 0);
@@ -96,7 +96,7 @@ public static class ExecutionOrderAttributeEditor
 				}
 			}
 
-			List<MonoScript> roots = new List<MonoScript>();
+			var roots = new List<MonoScript>();
 			foreach(var kvp in degrees)
 			{
 				var node = kvp.Key;
@@ -109,7 +109,7 @@ public static class ExecutionOrderAttributeEditor
 
 		public static void PropagateValues(Dictionary<MonoScript, List<MonoScript>> graph, Dictionary<MonoScript, int> values, int valueIncrement)
 		{
-			Queue<MonoScript> queue = new Queue<MonoScript>();
+			var queue = new Queue<MonoScript>();
 
 			foreach(var node in values.Keys)
 				queue.Enqueue(node);
@@ -147,7 +147,7 @@ public static class ExecutionOrderAttributeEditor
 
 	static Dictionary<Type, MonoScript> GetTypeDictionary()
 	{
-		Dictionary<Type, MonoScript> types = new Dictionary<Type, MonoScript>();
+		var types = new Dictionary<Type, MonoScript>();
 
 		var scripts = MonoImporter.GetAllRuntimeMonoScripts();
 		foreach(var script in scripts)
@@ -173,7 +173,7 @@ public static class ExecutionOrderAttributeEditor
 
 	static List<ScriptExecutionOrderDependency> GetExecutionOrderDependencies(Dictionary<Type, MonoScript> types)
 	{
-		List<ScriptExecutionOrderDependency> list = new List<ScriptExecutionOrderDependency>();
+		var list = new List<ScriptExecutionOrderDependency>();
 
 		foreach(var kvp in types)
 		{
@@ -206,7 +206,7 @@ public static class ExecutionOrderAttributeEditor
 
 	static List<ScriptExecutionOrderDefinition> GetExecutionOrderDefinitions(Dictionary<Type, MonoScript> types)
 	{
-		List<ScriptExecutionOrderDefinition> list = new List<ScriptExecutionOrderDefinition>();
+		var list = new List<ScriptExecutionOrderDefinition>();
 
 		foreach(var kvp in types)
 		{
@@ -226,7 +226,7 @@ public static class ExecutionOrderAttributeEditor
 	[UnityEditor.Callbacks.DidReloadScripts]
 	static void OnDidReloadScripts()
 	{
-		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		var stopwatch = new System.Diagnostics.Stopwatch();
 		Debug.Log(">>>>> start");
 		try
 		{
