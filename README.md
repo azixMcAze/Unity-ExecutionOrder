@@ -5,11 +5,14 @@ A collection of attributes to control the execution order of your scripts in Uni
 ## Use
 Add one of these attribute to your script's class definition to change its script execution order :
 - `[ExecutionOrder(int order)]` : The script execution order is set to `order`
-- `[ExecuteAfter(Type type)]` : The script execution order is set to a value superior to the one of the script `type`. This will ensure that your script will be executed after the script `type`. By default, the script execution order is increased by 10.
+- `[ExecuteAfter(Type type)]` : The script execution order is set to a value greater than the one of the script `type`. This will ensure that your script will be executed after the script `type`. By default, the script execution order is increased by 10.
 
 A script can have multiple `ExecuteAfter` attributes and will be executed after all the scripts given in parameters.
 A script cannot have both an `ExecutionOrder` and an `ExecuteAfter` attribute.
 
+Changing the execution order of a script with either an `ExecutionOrder` or an `ExecuteAfter` attribute from the *Script Execution Order* inspector in Unity will have no effect. The order will be reset to the one defined by the attributes.
+
+Changing a script execution order, either from the inspector or with an attribute, will cause a recompilation of the scripts.
 
 ## Example
 ```csharp
@@ -48,4 +51,6 @@ public class Script4 : MonoBehaviour {
     }
 }
 ```
+The resulting script execution orders in the inspector:
 
+![Script Execution Order inspector screenshot](/docs/screenshot1.png)
