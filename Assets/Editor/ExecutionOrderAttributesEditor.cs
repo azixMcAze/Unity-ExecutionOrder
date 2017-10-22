@@ -7,24 +7,30 @@ public static class ExecutionOrderAttributeEditor
 {
 	static class Graph
 	{
-		public static Dictionary<MonoScript, List<MonoScript>> Create(List<ScriptExecutionOrderDefinition> definitions, List<ScriptExecutionOrderDependency> dependencies)
+		public struct Edge
 		{
-			var graph = new Dictionary<MonoScript, List<MonoScript>>();
+			public MonoScript node;
+			public int weight;
+		}
+
+		public static Dictionary<MonoScript, List<Edge>> Create(List<ScriptExecutionOrderDefinition> definitions, List<ScriptExecutionOrderDependency> dependencies)
+		{
+			var graph = new Dictionary<MonoScript, List<Edge>>();
 
 			foreach(var dependency in dependencies)
 			{
 				var source = dependency.firstScript;
 				var dest = dependency.secondScript;
-				List<MonoScript> edges;
+				List<Edge> edges;
 				if(!graph.TryGetValue(source, out edges))
 				{
-					edges = new List<MonoScript>();
+					edges = new List<Edge>();
 					graph.Add(source, edges);
 				}
-				edges.Add(dest);
+				edges.Add(new Edge() { node = dest, weight = dependency.orderDiff });
 				if(!graph.ContainsKey(dest))
 				{
-					graph.Add(dest, new List<MonoScript>());
+					graph.Add(dest, new List<Edge>());
 				}
 			}
 
@@ -33,22 +39,23 @@ public static class ExecutionOrderAttributeEditor
 				var node = definition.script;
 				if(!graph.ContainsKey(node))
 				{
-					graph.Add(node, new List<MonoScript>());
+					graph.Add(node, new List<Edge>());
 				}
 			}
 
 			return graph;
 		}
 
-		static bool IsCyclicRecursion(Dictionary<MonoScript, List<MonoScript>> graph, MonoScript node, Dictionary<MonoScript, bool> visited, Dictionary<MonoScript, bool> inPath)
+		static bool IsCyclicRecursion(Dictionary<MonoScript, List<Edge>> graph, MonoScript node, Dictionary<MonoScript, bool> visited, Dictionary<MonoScript, bool> inPath)
 		{
 			if(!visited[node])
 			{
 				visited[node] = true;
 				inPath[node] = true;
 
-				foreach(var succ in graph[node])
+				foreach(var edge in graph[node])
 				{
+					var succ = edge.node;
 					if(IsCyclicRecursion(graph, succ, visited, inPath))
 					{
 						inPath[node] = false;
@@ -69,7 +76,7 @@ public static class ExecutionOrderAttributeEditor
 			}
 		}
 
-		public static bool IsCyclic(Dictionary<MonoScript, List<MonoScript>> graph)
+		public static bool IsCyclic(Dictionary<MonoScript, List<Edge>> graph)
 		{
 			var visited = new Dictionary<MonoScript, bool>();
 			var inPath = new Dictionary<MonoScript, bool>();
@@ -86,7 +93,7 @@ public static class ExecutionOrderAttributeEditor
 			return false;
 		}
 
-		public static List<MonoScript> GetRoots(Dictionary<MonoScript, List<MonoScript>> graph)
+		public static List<MonoScript> GetRoots(Dictionary<MonoScript, List<Edge>> graph)
 		{
 			var degrees = new Dictionary<MonoScript, int>();
 			foreach(var node in graph.Keys)
@@ -98,8 +105,9 @@ public static class ExecutionOrderAttributeEditor
 			{
 				var node = kvp.Key;
 				var edges = kvp.Value;
-				foreach(var succ in edges)
+				foreach(var edge in edges)
 				{
+					var succ = edge.node;
 					degrees[succ]++;
 				}
 			}
@@ -115,7 +123,7 @@ public static class ExecutionOrderAttributeEditor
 			return roots;
 		}
 
-		public static void PropagateValues(Dictionary<MonoScript, List<MonoScript>> graph, Dictionary<MonoScript, int> values, int increment)
+		public static void PropagateValues(Dictionary<MonoScript, List<Edge>> graph, Dictionary<MonoScript, int> values)
 		{
 			var queue = new Queue<MonoScript>();
 
@@ -125,10 +133,12 @@ public static class ExecutionOrderAttributeEditor
 			while(queue.Count > 0)
 			{
 				var node = queue.Dequeue();
-				int value = values[node] + increment;
+				int currentValue = values[node];
 
-				foreach(var succ in graph[node])
+				foreach(var edge in graph[node])
 				{
+					var succ = edge.node;
+					var value = currentValue + edge.weight;
 					int prevValue;
 					if(!values.TryGetValue(succ, out prevValue) || value > prevValue)
 					{
@@ -150,7 +160,7 @@ public static class ExecutionOrderAttributeEditor
 	{
 		public MonoScript firstScript { get; set; }
 		public MonoScript secondScript { get; set; }
-		// public int orderDiff { get; set; }
+		public int orderDiff { get; set; }
 	}
 
 	static Dictionary<Type, MonoScript> GetTypeDictionary()
@@ -200,7 +210,7 @@ public static class ExecutionOrderAttributeEditor
 				foreach(var attribute in attributes)
 				{
 					MonoScript targetScript = types[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script/*, orderDiff = attribute.orderDiff*/ };
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
 					list.Add(dependency);
 				}
 			}
@@ -308,7 +318,7 @@ public static class ExecutionOrderAttributeEditor
 
 		var roots = Graph.GetRoots(graph);
 		var orders = GetInitalExecutionOrder(definitions, roots);
-		Graph.PropagateValues(graph, orders, 10);
+		Graph.PropagateValues(graph, orders);
 
 		UpdateExecutionOrder(orders);
 	}
