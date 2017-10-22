@@ -198,7 +198,10 @@ public static class ExecutionOrderAttributeEditor
 			var type = kvp.Key;
 			var script = kvp.Value;
 			bool hasExecutionOrderAttribute = Attribute.IsDefined(type, typeof(ExecutionOrderAttribute));
-			if(Attribute.IsDefined(type, typeof(ExecuteAfterAttribute)))
+			bool hasExecuteAfterAttribute = Attribute.IsDefined(type, typeof(ExecuteAfterAttribute));
+			bool hasExecuteBeforeAttribute = Attribute.IsDefined(type, typeof(ExecuteBeforeAttribute));
+
+			if(hasExecuteAfterAttribute)
 			{
 				if(hasExecutionOrderAttribute)
 				{
@@ -230,22 +233,17 @@ public static class ExecutionOrderAttributeEditor
 					list.Add(dependency);
 				}
 			}
-			// if(Attribute.IsDefined(type, typeof(ExecuteBeforeAttribute)))
-			// {
-			// 	if(hasExecutionOrderAttribute)
-			// 	{
-			// 		Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteBefore] attributes", script.name);
-			// 		continue;
-			// 	}
 
-			// 	var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
-			// 	foreach(var attribute in attributes)
-			// 	{
-			// 		MonoScript targetScript = types[attribute.targetType];
-			// 		ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = script, secondScript = targetScript, orderDiff = attribute.orderDiff };
-			// 		list.Add(dependency);
-			// 	}
-			// }
+			if (hasExecuteBeforeAttribute)
+			{
+				var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
+				foreach(var attribute in attributes)
+				{
+					MonoScript targetScript = types[attribute.targetType];
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = -attribute.orderDiff };
+					list.Add(dependency);
+				}
+			}
 		}
 
 		return list;
