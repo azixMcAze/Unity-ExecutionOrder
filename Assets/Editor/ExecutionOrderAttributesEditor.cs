@@ -27,7 +27,7 @@ public static class ExecutionOrderAttributeEditor
 					edges = new List<Edge>();
 					graph.Add(source, edges);
 				}
-				edges.Add(new Edge() { node = dest, weight = dependency.orderDiff });
+				edges.Add(new Edge() { node = dest, weight = dependency.orderDelta });
 				if(!graph.ContainsKey(dest))
 				{
 					graph.Add(dest, new List<Edge>());
@@ -162,7 +162,7 @@ public static class ExecutionOrderAttributeEditor
 	{
 		public MonoScript firstScript { get; set; }
 		public MonoScript secondScript { get; set; }
-		public int orderDiff { get; set; }
+		public int orderDelta { get; set; }
 	}
 
 	static Dictionary<Type, MonoScript> GetTypeDictionary()
@@ -214,9 +214,9 @@ public static class ExecutionOrderAttributeEditor
 				var attributes = (ExecuteAfterAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteAfterAttribute));
 				foreach(var attribute in attributes)
 				{
-					if(attribute.orderDiff < 0)
+					if(attribute.orderIncrease < 0)
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderDiff. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name);
+						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderIncrease. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name);
 						continue;
 					}
 
@@ -227,7 +227,7 @@ public static class ExecutionOrderAttributeEditor
 					}
 
 					MonoScript targetScript = types[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDelta = attribute.orderIncrease };
 					list.Add(dependency);
 				}
 			}
@@ -249,9 +249,9 @@ public static class ExecutionOrderAttributeEditor
 				var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
 				foreach(var attribute in attributes)
 				{
-					if(attribute.orderDiff < 0)
+					if(attribute.orderDecrease < 0)
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDiff. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name);
+						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDecrease. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name);
 						continue;
 					}
 
@@ -262,7 +262,7 @@ public static class ExecutionOrderAttributeEditor
 					}
 
 					MonoScript targetScript = types[attribute.targetType];
-					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = -attribute.orderDiff };
+					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDelta = -attribute.orderDecrease };
 					list.Add(dependency);
 				}
 			}

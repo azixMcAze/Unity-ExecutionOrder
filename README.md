@@ -5,8 +5,8 @@ A collection of attributes to control the execution order of your scripts in Uni
 ## Use
 Add one of these attribute to your script's class definition to change its script execution order :
 - `[ExecutionOrder(<order>)]` : The script execution order is set to `order`
-- `[ExecuteAfter(<type>[, orderDiff = <increase>])]` : The script execution order is set to a value greater than the one of the script `type`, ensuring that your script will be executed after this script. By default, the script execution order is increased by 10 but this can be changed by adding the `orderDiff` argument.
-- `[ExecuteBefore(<type>[, orderDiff = <decrease>])]` : Same as `ExecuteAfter` except that the execution order will be lowered, ensuring that your script will be executed before this script.
+- `[ExecuteAfter(<type>[, orderIncrease = <increase>])]` : The script execution order is set to a value greater than the one of the script `type`, ensuring that your script will be executed after this script. By default, the script execution order is increased by 10 but this can be changed by adding the `orderIncrease` argument.
+- `[ExecuteBefore(<type>[, orderDecrease = <decrease>])]` : Same as `ExecuteAfter` except that the execution order will be lowered, ensuring that your script will be executed before this script.
 
 A script can have multiple `ExecuteAfter` attributes and will be executed after all the scripts given in parameters. It is the same for the `ExecuteBefore` attibutes except it will be executed before all the scripts given in parameters.
 

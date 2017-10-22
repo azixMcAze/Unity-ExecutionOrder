@@ -15,12 +15,12 @@ public class ExecutionOrderAttribute : System.Attribute
 public class ExecuteAfterAttribute : System.Attribute
 {
 	public Type targetType;
-	public int orderDiff;
+	public int orderIncrease;
 
 	public ExecuteAfterAttribute(Type targetType)
 	{
 		this.targetType = targetType;
-		this.orderDiff = 10;
+		this.orderIncrease = 10;
 	}
 }
 
@@ -28,11 +28,11 @@ public class ExecuteAfterAttribute : System.Attribute
 public class ExecuteBeforeAttribute : System.Attribute
 {
 	public Type targetType;
-	public int orderDiff;
+	public int orderDecrease;
 
 	public ExecuteBeforeAttribute(Type targetType)
 	{
 		this.targetType = targetType;
-		this.orderDiff = 10;
+		this.orderDecrease = 10;
 	}
 }
