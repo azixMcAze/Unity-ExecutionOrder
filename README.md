@@ -4,13 +4,15 @@ A collection of attributes to control the execution order of your scripts in Uni
 
 ## Use
 Add one of these attribute to your script's class definition to change its script execution order :
-- `[ExecutionOrder(int order)]` : The script execution order is set to `order`
-- `[ExecuteAfter(Type type)]` : The script execution order is set to a value greater than the one of the script `type`. This will ensure that your script will be executed after the script `type`. By default, the script execution order is increased by 10.
+- `[ExecutionOrder(<order>)]` : The script execution order is set to `order`
+- `[ExecuteAfter(<type>[, orderDiff = <increase>])]` : The script execution order is set to a value greater than the one of the script `type`, ensuring that your script will be executed after this script. By default, the script execution order is increased by 10 but this can be changed by adding the `orderDiff` argument.
+- `[ExecuteBefore(<type>[, orderDiff = <decrease>])]` : Same as `ExecuteAfter` except that the execution order will be lowered, ensuring that your script will be executed before this script.
 
-A script can have multiple `ExecuteAfter` attributes and will be executed after all the scripts given in parameters.
-A script cannot have both an `ExecutionOrder` and an `ExecuteAfter` attribute.
+A script can have multiple `ExecuteAfter` attributes and will be executed after all the scripts given in parameters. It is the same for the `ExecuteBefore` attibutes except it will be executed before all the scripts given in parameters.
 
-Changing the execution order of a script with either an `ExecutionOrder` or an `ExecuteAfter` attribute from the *Script Execution Order* inspector in Unity will have no effect. The order will be reset to the one defined by the attributes.
+A script can only have one type of these attributes and cannot mix the `ExecutionOrder`, `ExecuteAfter` and `ExecuteBefore` attributes.
+
+Changing the execution order of a script with one of these attributes in the *Script Execution Order* inspector from Unity will have no effect. The order will be reset to the one defined by the attributes.
 
 Changing a script execution order, either from the inspector or with an attribute, will cause a recompilation of the scripts.
 
