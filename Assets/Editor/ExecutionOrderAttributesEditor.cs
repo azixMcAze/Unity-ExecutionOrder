@@ -214,11 +214,6 @@ public static class ExecutionOrderAttributeEditor
 				var attributes = (ExecuteAfterAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteAfterAttribute));
 				foreach(var attribute in attributes)
 				{
-					if(attribute.orderDiff == 0)
-					{
-						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteAfter] attribute with a zero orderDiff. This [ExecuteAfter] attribute will have no effect.", script.name);
-					}
-
 					if(attribute.orderDiff < 0)
 					{
 						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderDiff. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name);
@@ -254,11 +249,6 @@ public static class ExecutionOrderAttributeEditor
 				var attributes = (ExecuteBeforeAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteBeforeAttribute));
 				foreach(var attribute in attributes)
 				{
-					if(attribute.orderDiff == 0)
-					{
-						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteBefore] attribute with a zero orderDiff. This [ExecuteBefore] attribute will have no effect.", script.name);
-					}
-
 					if(attribute.orderDiff < 0)
 					{
 						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDiff. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name);
