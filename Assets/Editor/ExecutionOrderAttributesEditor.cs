@@ -221,7 +221,8 @@ public static class ExecutionOrderAttributeEditor
 
 					if(attribute.orderDiff < 0)
 					{
-						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderDiff. Consider using the [ExecuteBefore] attribute instead.", script.name);
+						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderDiff. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name);
+						continue;
 					}
 
 					if(!attribute.targetType.IsSubclassOf(typeof(MonoBehaviour)) && !attribute.targetType.IsSubclassOf(typeof(ScriptableObject)))
@@ -260,7 +261,8 @@ public static class ExecutionOrderAttributeEditor
 
 					if(attribute.orderDiff < 0)
 					{
-						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDiff. Consider using the [ExecuteAfter] attribute instead.", script.name);
+						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDiff. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name);
+						continue;
 					}
 
 					if(!attribute.targetType.IsSubclassOf(typeof(MonoBehaviour)) && !attribute.targetType.IsSubclassOf(typeof(ScriptableObject)))
