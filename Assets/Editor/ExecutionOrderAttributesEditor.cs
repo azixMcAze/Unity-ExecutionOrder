@@ -202,13 +202,29 @@ public static class ExecutionOrderAttributeEditor
 			{
 				if(hasExecutionOrderAttribute)
 				{
-					Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteAfter] attributes", script.name);
+					Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteAfter] attributes. Ignoring the [ExecuteAfter] attribute.", script.name);
 					continue;
 				}
 
 				var attributes = (ExecuteAfterAttribute[])Attribute.GetCustomAttributes(type, typeof(ExecuteAfterAttribute));
 				foreach(var attribute in attributes)
 				{
+					if(attribute.orderDiff == 0)
+					{
+						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteAfter] attribute with a zero orderDiff. This [ExecuteAfter] attribute will have no effect.", script.name);
+					}
+
+					if(attribute.orderDiff < 0)
+					{
+						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderDiff. Consider using the [ExecuteBefore] attribute instead.", script.name);
+					}
+
+					if(!attribute.targetType.IsSubclassOf(typeof(MonoBehaviour)) && !attribute.targetType.IsSubclassOf(typeof(ScriptableObject)))
+					{
+						Debug.LogWarningFormat(script, "Script {0} has an [ExecuteAfter] attribute with targetScript={1} which is not a MonoBehaviour nor a ScriptableObject. Ignoring this [ExecuteAfter] attribute.", script.name, attribute.targetType.Name);
+						continue;
+					}
+
 					MonoScript targetScript = types[attribute.targetType];
 					ScriptExecutionOrderDependency dependency = new ScriptExecutionOrderDependency() { firstScript = targetScript, secondScript = script, orderDiff = attribute.orderDiff };
 					list.Add(dependency);
