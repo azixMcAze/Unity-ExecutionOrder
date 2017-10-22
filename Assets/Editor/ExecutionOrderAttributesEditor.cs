@@ -138,11 +138,13 @@ public static class ExecutionOrderAttributeEditor
 				foreach(var edge in graph[node])
 				{
 					var succ = edge.node;
-					var value = currentValue + edge.weight;
+					var newValue = currentValue + edge.weight;
 					int prevValue;
-					if(!values.TryGetValue(succ, out prevValue) || value > prevValue)
+					bool hasPrevValue = values.TryGetValue(succ, out prevValue);
+					bool newValueBeyond = (edge.weight > 0) ? (newValue > prevValue) : (newValue < prevValue);
+					if(!hasPrevValue || newValueBeyond)
 					{
-						values[succ] = value;
+						values[succ] = newValue;
 						queue.Enqueue(succ);
 					}
 				}
