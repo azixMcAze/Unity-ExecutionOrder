@@ -22,16 +22,16 @@ Changing a script execution order, either from the inspector or with an attribut
 // set from the Script Execution Order inspector in Unity
 public class Script1 : MonoBehaviour {
     void Start () {
-        Debug.Log("First");
+        Debug.Log("Second");
     }
 }
 ```
 ```csharp
-// this script will have an execution order of 60 (50+10)
-[ExecuteAfter(typeof(Script1))]
+// this script will have an execution order of 40 (50-10)
+[ExecuteBefore(typeof(Script1))]
 public class Script2 : MonoBehaviour {
     void Start () {
-        Debug.Log("Second");
+        Debug.Log("First");
     }
 }
 ```
@@ -45,8 +45,8 @@ public class Script3 : MonoBehaviour {
 }
 ```
 ```csharp
-// this script will have an execution order of 110 (max(60+10, 100+10))
-[ExecuteAfter(typeof(Script2)), ExecuteAfter(typeof(Script3))]
+// this script will have an execution order of 120 (max(40+10, 100+20))
+[ExecuteAfter(typeof(Script2)), ExecuteAfter(typeof(Script3), orderIncrease = 20)]
 public class Script4 : MonoBehaviour {
     void Start () {
         Debug.Log("Fourth");

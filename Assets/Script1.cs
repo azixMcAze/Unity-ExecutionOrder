@@ -6,6 +6,6 @@ using UnityEngine;
 // set from the Script Execution Order inspector in Unity
 public class Script1 : MonoBehaviour {
     void Start () {
-        Debug.Log("First");
+        Debug.Log("Second");
     }
 }
