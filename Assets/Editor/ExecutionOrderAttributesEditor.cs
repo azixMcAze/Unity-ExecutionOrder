@@ -207,7 +207,7 @@ public static class ExecutionOrderAttributeEditor
 			{
 				if(hasExecutionOrderAttribute)
 				{
-					Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteAfter] attributes. Ignoring the [ExecuteAfter] attribute.", script.name);
+					Debug.LogError(string.Format("Script {0} has both [ExecutionOrder] and [ExecuteAfter] attributes. Ignoring the [ExecuteAfter] attribute.", script.name), script);
 					continue;
 				}
 
@@ -216,13 +216,13 @@ public static class ExecutionOrderAttributeEditor
 				{
 					if(attribute.orderIncrease < 0)
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with a negative orderIncrease. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name);
+						Debug.LogError(string.Format("Script {0} has an [ExecuteAfter] attribute with a negative orderIncrease. Use the [ExecuteBefore] attribute instead. Ignoring this [ExecuteAfter] attribute.", script.name), script);
 						continue;
 					}
 
 					if(!attribute.targetType.IsSubclassOf(typeof(MonoBehaviour)) && !attribute.targetType.IsSubclassOf(typeof(ScriptableObject)))
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteAfter] attribute with targetScript={1} which is not a MonoBehaviour nor a ScriptableObject. Ignoring this [ExecuteAfter] attribute.", script.name, attribute.targetType.Name);
+						Debug.LogError(string.Format("Script {0} has an [ExecuteAfter] attribute with targetScript={1} which is not a MonoBehaviour nor a ScriptableObject. Ignoring this [ExecuteAfter] attribute.", script.name, attribute.targetType.Name), script);
 						continue;
 					}
 
@@ -236,13 +236,13 @@ public static class ExecutionOrderAttributeEditor
 			{
 				if(hasExecutionOrderAttribute)
 				{
-					Debug.LogErrorFormat(script, "Script {0} has both [ExecutionOrder] and [ExecuteBefore] attributes. Ignoring the [ExecuteBefore] attribute.", script.name);
+					Debug.LogError(string.Format("Script {0} has both [ExecutionOrder] and [ExecuteBefore] attributes. Ignoring the [ExecuteBefore] attribute.", script.name), script);
 					continue;
 				}
 
 				if(hasExecuteAfterAttribute)
 				{
-					Debug.LogErrorFormat(script, "Script {0} has both [ExecuteAfter] and [ExecuteBefore] attributes. Ignoring the [ExecuteBefore] attribute.", script.name);
+					Debug.LogError(string.Format("Script {0} has both [ExecuteAfter] and [ExecuteBefore] attributes. Ignoring the [ExecuteBefore] attribute.", script.name), script);
 					continue;
 				}
 
@@ -251,13 +251,13 @@ public static class ExecutionOrderAttributeEditor
 				{
 					if(attribute.orderDecrease < 0)
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with a negative orderDecrease. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name);
+						Debug.LogError(string.Format("Script {0} has an [ExecuteBefore] attribute with a negative orderDecrease. Use the [ExecuteAfter] attribute instead. Ignoring this [ExecuteBefore] attribute.", script.name), script);
 						continue;
 					}
 
 					if(!attribute.targetType.IsSubclassOf(typeof(MonoBehaviour)) && !attribute.targetType.IsSubclassOf(typeof(ScriptableObject)))
 					{
-						Debug.LogErrorFormat(script, "Script {0} has an [ExecuteBefore] attribute with targetScript={1} which is not a MonoBehaviour nor a ScriptableObject. Ignoring this [ExecuteBefore] attribute.", script.name, attribute.targetType.Name);
+						Debug.LogError(string.Format("Script {0} has an [ExecuteBefore] attribute with targetScript={1} which is not a MonoBehaviour nor a ScriptableObject. Ignoring this [ExecuteBefore] attribute.", script.name, attribute.targetType.Name), script);
 						continue;
 					}
 
